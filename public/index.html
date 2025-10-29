@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>Reservatorios HAG - Login</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="login-box">
+    <h2>Reservatórios - HAG</h2>
+    <form id="loginForm">
+      <label>Usuário</label>
+      <input type="text" id="user" value="hag" />
+      <label>Senha</label>
+      <input type="password" id="pass" value="38195156" />
+      <button type="submit">Entrar</button>
+      <div id="msg" style="color:#ff6b6b;margin-top:8px"></div>
+    </form>
+  </div>
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const user = document.getElementById('user').value;
+      const pass = document.getElementById('pass').value;
+      const resp = await fetch('/login', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({user, pass})
+      });
+      if (resp.ok) {
+        window.location = '/dashboard.html';
+      } else {
+        document.getElementById('msg').innerText = 'Usuário ou senha inválidos';
+      }
+    });
+  </script>
+</body>
+</html>
