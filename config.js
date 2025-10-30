@@ -1,7 +1,4 @@
-// Configurações de usuário e sensores
-exports.USER = "hag";
-exports.PASS = "38195156";
-exports.SENSORS = {
+ {
   "Reservatorio_Elevador_current": {
     nome: "Reservatório Elevador",
     leituraVazio: 0.004168,
