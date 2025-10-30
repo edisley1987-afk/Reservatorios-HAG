@@ -1,92 +1,66 @@
-const express = require('express');
-const fs = require('fs');
-const path = require('path');
-const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser');
-const { USER, PASS, SENSORS } = require('./config');
+import express from "express";
+import fs from "fs";
+import cors from "cors";
+import { SENSORS } from "./config.js";
 
 const app = express();
-const DATA_FILE = path.join(__dirname, 'data', 'readings.json');
+app.use(cors());
+app.use(express.json());
+app.use(express.static("public"));
 
-app.use(bodyParser.json({limit: '1mb'}));
-app.use(bodyParser.urlencoded({extended:true}));
-app.use(cookieParser());
+const LOG_FILE = "./data/log.json";
 
-// serve static
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Accept POSTs on any path
-app.post('*', (req, res) => {
-  try {
-    const body = req.body || {};
-    const data = body.data || [];
-
-    let readings = [];
-    if (fs.existsSync(DATA_FILE)) {
-      try { readings = JSON.parse(fs.readFileSync(DATA_FILE)); } catch(e){ readings = []; }
-    }
-
-    const timestamp = Date.now();
-    for (const item of data) {
-      if (item && item.ref && (SENSORS[item.ref] || true)) {
-        // store raw value and timestamp
-        readings.push({
-          ref: item.ref,
-          value: item.value,
-          dev_id: item.dev_id || null,
-          timestamp
-        });
-      }
-    }
-
-    // keep last 24 hours
-    const cutoff = timestamp - 24*60*60*1000;
-    readings = readings.filter(r => r.timestamp > cutoff);
-
-    fs.writeFileSync(DATA_FILE, JSON.stringify(readings, null, 2));
-    res.status(200).send('OK');
-  } catch(err) {
-    console.error('POST error', err);
-    res.status(500).send('error');
-  }
-});
-
-// API for frontend to fetch readings
-app.get('/api/readings', (req, res) => {
-  if (!fs.existsSync(DATA_FILE)) return res.json([]);
-  try {
-    const readings = JSON.parse(fs.readFileSync(DATA_FILE));
-    res.json(readings);
-  } catch(e){
-    res.json([]);
-  }
-});
-
-// simple login endpoint (POST JSON or form)
-app.post('/login', (req, res) => {
-  const u = req.body.user || req.query.user;
-  const p = req.body.pass || req.query.pass;
-  if (u === USER && p === PASS) {
-    // set a cookie valid for 8 hours
-    res.cookie('auth', '1', { httpOnly: true, maxAge: 8*60*60*1000 });
-    return res.json({ ok: true });
-  }
-  res.status(401).json({ ok:false, message:'invalid' });
-});
-
-// logout
-app.post('/logout', (req, res) => {
-  res.clearCookie('auth');
-  res.json({ ok:true });
-});
-
-// middleware to protect dashboard API routes (optional)
-function requireAuth(req, res, next){
-  if (req.cookies && req.cookies.auth === '1') return next();
-  // allow fetching readings for demo but frontend expects login; still allow
-  return res.status(401).json({ ok:false, message: 'unauthorized' });
+// função auxiliar
+function salvarRegistro(dado) {
+  if (!fs.existsSync("./data")) fs.mkdirSync("./data");
+  fs.appendFileSync(LOG_FILE, JSON.stringify(dado) + ",\n");
 }
 
-// start server
+// rota para receber dados do Gateway
+app.post("/api/send", (req, res) => {
+  try {
+    const { sensor, value } = req.body;
+    const conf = SENSORS[sensor];
+
+    if (!conf) {
+      console.log("Sensor não encontrado:", sensor);
+      return res.status(404).send("Sensor desconhecido");
+    }
+
+    const perc = ((value - conf.leituraVazio) / (conf.leituraCheio - conf.leituraVazio)) * 100;
+    const litros = (perc / 100) * conf.capacidadeTotal;
+
+    const registro = {
+      hora: new Date().toLocaleString("pt-BR"),
+      sensor: conf.nome,
+      valor: value,
+      porcentagem: Math.max(0, Math.min(100, perc)),
+      litros: Math.max(0, litros)
+    };
+
+    salvarRegistro(registro);
+    res.send("OK");
+  } catch (error) {
+    console.error("Erro ao gravar dado:", error);
+    res.status(500).send("Erro interno no servidor");
+  }
+});
+
+// rota para listar últimas leituras (dashboard)
+app.get("/api/data", (req, res) => {
+  try {
+    if (!fs.existsSync(LOG_FILE)) return res.json([]);
+    const dados = fs.readFileSync(LOG_FILE, "utf-8")
+      .split("\n")
+      .filter(Boolean)
+      .map(line => JSON.parse(line))
+      .slice(-100); // últimas 100 leituras
+    res.json(dados.reverse());
+  } catch (error) {
+    console.error("Erro ao ler log:", error);
+    res.status(500).send("Erro interno");
+  }
+});
+
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log('Server listening on port', PORT));
+app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
