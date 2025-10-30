@@ -1,51 +1,158 @@
-:root{
-  --bg:#0f1720;
-  --panel:#0f1a23;
-  --muted:#9aa6b2;
-  --accent:#2b6cb0;
-  --green:#22c55e;
-  --yellow:#f59e0b;
-  --red:#ef4444;
-  --card:#0f1720;
+/* style.css */
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  background: #0e1117;
+  color: #e5e5e5;
 }
-*{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-  background:var(--bg);
-  color:#e6eef6;
-  padding:22px;
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #1a1f2b;
+  color: #fff;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
 }
-header{display:flex;align-items:center;justify-content:space-between}
-h1{margin:0 0 18px 0;color:#6fb0ff}
-.top-actions{display:flex;gap:12px;align-items:center}
-#siteInfo{display:flex;flex-direction:column;align-items:flex-end;margin-right:12px}
-#siteTitle{font-weight:700}
-.last-update{font-size:13px;color:var(--muted)}
-button#logoutBtn{background:#1f2937;border:0;color:#fff;padding:8px 12px;border-radius:8px;cursor:pointer}
 
-.cards{display:flex;gap:18px;flex-wrap:wrap;margin:18px 0}
-.card{
-  background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.05));
-  padding:16px;border-radius:10px;min-width:240px;flex:1 1 240px;box-shadow:0 6px 18px rgba(0,0,0,0.6);
-  position:relative;
+header h1 {
+  margin: 0;
+  font-size: 1.6rem;
 }
-.card h3{margin:0 0 8px 0}
-.metric{font-weight:700;font-size:18px}
-.sub{font-size:13px;color:var(--muted);margin-top:8px}
 
-.bar{height:14px;background:#0b1220;border-radius:10px;overflow:hidden;margin-top:12px}
-.fill{height:100%;width:0%;background:var(--green);display:flex;align-items:center;justify-content:center;color:#001; font-weight:700}
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
 
-#charts{margin-top:24px}
-#chartCanvas{width:100%;max-width:1200px;background:#071018;border-radius:8px;display:block;margin:12px 0;padding:8px;border:1px solid rgba(255,255,255,0.02)}
+#logoutBtn {
+  background: #dc3545;
+  border: none;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.2s;
+}
 
-#tableWrap{margin-top:18px;overflow:auto;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.03));padding:12px;border-radius:8px}
-table{width:100%;border-collapse:collapse}
-th,td{padding:10px 8px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.02)}
-th{color:var(--muted)}
-tr:last-child td{border-bottom:0}
+#logoutBtn:hover {
+  background: #c82333;
+}
 
-.small{font-size:12px;color:var(--muted)}
+main {
+  padding: 2rem;
+}
 
-.card:hover{transform:translateY(-3px);transition:all .12s ease}
+#cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.card {
+  background: #1c2333;
+  padding: 1.2rem;
+  border-radius: 12px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+}
+
+.card h3 {
+  margin: 0 0 0.5rem 0;
+  color: #fff;
+  font-size: 1.1rem;
+}
+
+.metric {
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 0.4rem 0;
+}
+
+.metric .small {
+  font-size: 1rem;
+  color: #ccc;
+}
+
+.bar {
+  height: 10px;
+  background: #2b3248;
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 0.5rem 0 1rem 0;
+}
+
+.fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.5s ease, background 0.5s ease;
+}
+
+.sub {
+  font-size: 0.9rem;
+  color: #bdbdbd;
+  margin-top: 0.2rem;
+}
+
+section h2 {
+  font-size: 1.3rem;
+  margin-bottom: 0.5rem;
+  color: #fff;
+  border-bottom: 2px solid #333;
+  padding-bottom: 0.4rem;
+}
+
+/* Tabela */
+#tableWrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+}
+
+table th,
+table td {
+  padding: 0.6rem 0.9rem;
+  border-bottom: 1px solid #333;
+  text-align: left;
+  white-space: nowrap;
+}
+
+table th {
+  background: #22283a;
+  color: #fff;
+}
+
+table tr:nth-child(even) {
+  background: #181c28;
+}
+
+table tr:hover {
+  background: #242b3d;
+}
+
+#lastUpdate {
+  font-size: 0.9rem;
+  color: #bdbdbd;
+}
+
+@media (max-width: 600px) {
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .top-actions {
+    margin-top: 0.8rem;
+  }
+}
