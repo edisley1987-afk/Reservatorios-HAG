@@ -1,4 +1,5 @@
 <!doctype html>
+
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
@@ -14,17 +15,51 @@
       <span class="last-update" id="lastUpdate"></span>
     </div>
   </header>
+
   <main>
     <section id="cards"></section>
-    <section id="charts">
-      <h2>Histórico (últimas 24h)</h2>
-      <canvas id="chartCanvas" width="1200" height="360"></canvas>
-    </section>
-    <section id="tableSection">
-      <h2>Leituras (últimas 24h)</h2>
-      <div id="tableWrap"></div>
-    </section>
+
+```
+<section id="charts">
+  <h2>Histórico (últimas 24h)</h2>
+  <canvas id="chartCanvas" width="1200" height="360"></canvas>
+</section>
+
+<section id="tableSection">
+  <h2>Leituras (últimas 24h)</h2>
+  <div id="tableWrap"></div>
+</section>
+```
+
   </main>
+
+  <!-- Script principal -->
+
   <script src="script.js"></script>
+
+  <script>
+    // 🔄 Atualiza as leituras automaticamente a cada 10 segundos
+    function atualizarDashboard() {
+      fetch("/api/data")
+        .then(res => res.json())
+        .then(dados => {
+          // Atualiza o conteúdo da dashboard (função vinda de script.js)
+          updateDashboard(dados);
+
+          // Mostra o horário da última atualização
+          const dataAgora = new Date().toLocaleString("pt-BR");
+          document.getElementById("lastUpdate").textContent =
+            "Última atualização: " + dataAgora;
+        })
+        .catch(err => console.error("Erro ao atualizar:", err));
+    }
+
+    // Primeira atualização imediata ao abrir a página
+    atualizarDashboard();
+
+    // Repetir atualização a cada 10 segundos
+    setInterval(atualizarDashboard, 10000);
+  </script>
+
 </body>
 </html>
