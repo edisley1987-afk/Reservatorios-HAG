@@ -1,1 +1,22 @@
-[]
+[
+  {
+    "ref": "Reservatorio_Elevador_current",
+    "value": 0.007855,
+    "ts": "2025-10-30T07:18:21Z"
+  },
+  {
+    "ref": "Reservatorio_Osmose_current",
+    "value": 0.006492,
+    "ts": "2025-10-30T07:18:21Z"
+  },
+  {
+    "ref": "Reservatorio_CME_current",
+    "value": 0.004408,
+    "ts": "2025-10-30T07:18:21Z"
+  },
+  {
+    "ref": "Agua_Abrandada_current",
+    "value": 0.004929,
+    "ts": "2025-10-30T07:18:21Z"
+  }
+]
