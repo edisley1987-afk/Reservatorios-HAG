@@ -95,6 +95,32 @@ app.post("/api/send3", (req, res) => {
   console.log("🔹 Recebido dado do reservatório 3:", req.body);
   res.json({ status: "OK" });
 });
+// Rota para leituras dos reservatórios
+app.get("/api/readings", (req, res) => {
+  res.json([
+    {
+      hora: "13:40",
+      sensor: "Elevador",
+      valor: 0,
+      porcentagem: 0,
+      litros: 0
+    },
+    {
+      hora: "13:41",
+      sensor: "Osmose",
+      valor: 0,
+      porcentagem: 0,
+      litros: 0
+    },
+    {
+      hora: "13:42",
+      sensor: "Água abrandada",
+      valor: 0,
+      porcentagem: 0,
+      litros: 0
+    }
+  ]);
+});
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
