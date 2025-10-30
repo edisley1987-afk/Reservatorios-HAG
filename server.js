@@ -1,6 +1,7 @@
-import express from "express";
-import fs from "fs";
-import cors from "cors";
+// server.js
+const express = require("express");
+const fs = require("fs");
+const cors = require("cors");
 const { SENSORS } = require("./config.js");
 
 const app = express();
@@ -10,13 +11,14 @@ app.use(express.static("public"));
 
 const LOG_FILE = "./data/log.json";
 
-// função auxiliar
+// Função auxiliar
 function salvarRegistro(dado) {
+  if (!fs.existsSync("./
   if (!fs.existsSync("./data")) fs.mkdirSync("./data");
   fs.appendFileSync(LOG_FILE, JSON.stringify(dado) + ",\n");
 }
 
-// rota para receber dados do Gateway
+// Rota para receber dados do Gateway
 app.post("/api/send", (req, res) => {
   try {
     const { sensor, value } = req.body;
@@ -46,7 +48,7 @@ app.post("/api/send", (req, res) => {
   }
 });
 
-// rota para listar últimas leituras (dashboard)
+// Rota para listar últimas leituras (dashboard)
 app.get("/api/data", (req, res) => {
   try {
     if (!fs.existsSync(LOG_FILE)) return res.json([]);
