@@ -52,6 +52,49 @@ app.get("/logout", (req, res) => {
   res.redirect("/");
 });
 
+// Rotas de API simuladas (substituir depois com os dados reais do gateway)
+app.get("/api/data1", (req, res) => {
+  res.json({
+    nivel: 0,
+    litros: 0,
+    capacidade: 20000,
+    ultimaAtualizacao: null,
+  });
+});
+
+app.get("/api/data2", (req, res) => {
+  res.json({
+    nivel: 0,
+    litros: 0,
+    capacidade: 200,
+    ultimaAtualizacao: null,
+  });
+});
+
+app.get("/api/data3", (req, res) => {
+  res.json({
+    nivel: 0,
+    litros: 0,
+    capacidade: 9000,
+    ultimaAtualizacao: null,
+  });
+});
+
+// Rotas de envio de dados (mock)
+app.post("/api/send1", (req, res) => {
+  console.log("🔹 Recebido dado do reservatório 1:", req.body);
+  res.json({ status: "OK" });
+});
+
+app.post("/api/send2", (req, res) => {
+  console.log("🔹 Recebido dado do reservatório 2:", req.body);
+  res.json({ status: "OK" });
+});
+
+app.post("/api/send3", (req, res) => {
+  console.log("🔹 Recebido dado do reservatório 3:", req.body);
+  res.json({ status: "OK" });
+});
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
