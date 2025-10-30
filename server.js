@@ -19,9 +19,6 @@ app.use(
   })
 );
 
-// --- Servir frontend ---
-app.use(express.static(path.join(__dirname, "public")));
-
 // --- Banco de dados temporário em memória ---
 let readings = {
   elevador: { valor: 0, porcentagem: 0, litros: 0, hora: null },
@@ -29,37 +26,6 @@ let readings = {
   cme: { valor: 0, porcentagem: 0, litros: 0, hora: null },
   aguaAbrandada: { valor: 0, porcentagem: 0, litros: 0, hora: null },
 };
-
-// --- LOGIN ---
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "login.html"));
-});
-
-app.post("/login", (req, res) => {
-  const { username, password } = req.body;
-  const user = users.find(
-    (u) => u.username === username && u.password === password
-  );
-
-  if (user) {
-    req.session.user = user;
-    res.redirect("/dashboard");
-  } else {
-    res.send(
-      `<script>alert("Usuário ou senha inválidos"); window.location.href = "/";</script>`
-    );
-  }
-});
-
-app.get("/dashboard", (req, res) => {
-  if (!req.session.user) return res.redirect("/");
-  res.sendFile(path.join(__dirname, "public", "dashboard.html"));
-});
-
-app.get("/logout", (req, res) => {
-  req.session.destroy();
-  res.redirect("/");
-});
 
 // --- ROTAS DE ENVIO (Gateway -> Servidor) ---
 app.post("/api/send1", (req, res) => {
@@ -112,6 +78,48 @@ app.get("/api/readings", (req, res) => {
     { sensor: "CME", ...readings.cme },
     { sensor: "Água abrandada", ...readings.aguaAbrandada },
   ]);
+});
+
+// --- Servir arquivos estáticos ---
+app.use(express.static(path.join(__dirname, "public")));
+
+// --- LOGIN E DASHBOARD ---
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "login.html"));
+});
+
+app.post("/login", (req, res) => {
+  const { username, password } = req.body;
+  const user = users.find(
+    (u) => u.username === username && u.password === password
+  );
+
+  if (user) {
+    req.session.user = user;
+    res.redirect("/dashboard");
+  } else {
+    res.send(
+      `<script>alert("Usuário ou senha inválidos"); window.location.href = "/";</script>`
+    );
+  }
+});
+
+app.get("/dashboard", (req, res) => {
+  if (!req.session.user) return res.redirect("/");
+  res.sendFile(path.join(__dirname, "public", "dashboard.html"));
+});
+
+app.get("/logout", (req, res) => {
+  req.session.destroy();
+  res.redirect("/");
+});
+
+// --- Fallback para arquivos estáticos ausentes ---
+app.use((req, res, next) => {
+  if (req.path.endsWith(".css") || req.path.endsWith(".js")) {
+    return res.sendFile(path.join(__dirname, "public", req.path));
+  }
+  next();
 });
 
 // --- Inicialização ---
