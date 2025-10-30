@@ -1,130 +1,57 @@
-// ======================
-// Reservatórios HAG Server
-// ======================
-
 const express = require("express");
+const session = require("express-session");
 const cors = require("cors");
 const path = require("path");
-const bodyParser = require("body-parser");
-const session = require("express-session");
-const { users } = require("./users"); // arquivo users.js
+const { users } = require("./users");
 
 const app = express();
-const PORT = process.env.PORT || 443;
+const PORT = process.env.PORT || 10080;
 
-// ===== Middlewares =====
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 app.use(cors());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
 app.use(
   session({
-    secret: "segredo-hag",
+    secret: "reservatorioshag",
     resave: false,
     saveUninitialized: true,
   })
 );
 
-// ===== Dados em memória =====
-let readings = [];
+app.use(express.static(path.join(__dirname, "public")));
 
-// ===== Rotas API =====
-
-// Recebe leituras do gateway IoT
-app.post("/api/send", (req, res) => {
-  try {
-    const data = req.body;
-    if (!data || typeof data !== "object") {
-      return res.status(400).json({ error: "Dados inválidos" });
-    }
-
-    const ts = new Date().toISOString();
-    const parsed = [];
-
-    // Caso venha um único objeto
-    if (data.ref && typeof data.value !== "undefined") {
-      parsed.push({
-        ref: data.ref,
-        value: parseFloat(data.value),
-        ts,
-      });
-    } else {
-      // Caso venha múltiplos sensores
-      for (const key in data) {
-        const val = data[key];
-        if (typeof val === "number" || typeof val === "string") {
-          parsed.push({
-            ref: key,
-            value: parseFloat(val),
-            ts,
-          });
-        } else if (val && typeof val.value !== "undefined") {
-          parsed.push({
-            ref: key,
-            value: parseFloat(val.value),
-            ts: val.ts || ts,
-          });
-        }
-      }
-    }
-
-    readings = readings.concat(parsed);
-    console.log("📡 Leituras recebidas:", parsed);
-    res.json({ ok: true, count: parsed.length });
-  } catch (err) {
-    console.error("Erro em /api/send:", err);
-    res.status(500).json({ error: "Erro interno" });
-  }
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "login.html"));
 });
 
-// Retorna as últimas leituras
-app.get("/api/readings", (req, res) => {
-  res.json(readings.slice(-200)); // últimas 200 leituras
-});
-
-// ===== Login =====
 app.post("/login", (req, res) => {
   const { username, password } = req.body;
   const user = users.find(
     (u) => u.username === username && u.password === password
   );
 
-  if (!user) {
-    return res
-      .status(401)
-      .json({ ok: false, msg: "Usuário ou senha inválidos" });
+  if (user) {
+    req.session.user = user;
+    res.redirect("/dashboard");
+  } else {
+    res.send(
+      `<script>alert("Usuário ou senha inválidos"); window.location.href = "/";</script>`
+    );
   }
-
-  req.session.user = user.username;
-  res.json({ ok: true });
 });
 
-// Logout
-app.get("/logout", (req, res) => {
-  req.session.destroy(() => {
-    res.redirect("/login.html");
-  });
-});
-
-// ===== Proteção da dashboard =====
-function requireLogin(req, res, next) {
-  if (!req.session.user) return res.redirect("/login.html");
-  next();
-}
-
-// ===== Frontend =====
-app.use(express.static(path.join(__dirname, "public")));
-
-// Página inicial protegida
-app.get("/", requireLogin, (req, res) => {
+app.get("/dashboard", (req, res) => {
+  if (!req.session.user) {
+    return res.redirect("/");
+  }
   res.sendFile(path.join(__dirname, "public", "dashboard.html"));
 });
 
-// ===== Rota padrão =====
-app.get("/api", (req, res) => {
-  res.json({ ok: true, msg: "Servidor HAG ativo 🚀" });
+app.get("/logout", (req, res) => {
+  req.session.destroy();
+  res.redirect("/");
 });
 
-// ===== Inicialização =====
 app.listen(PORT, () => {
-  console.log(`🌐 Servidor rodando na porta ${PORT}`);
+  console.log(`Servidor rodando na porta ${PORT}`);
 });
