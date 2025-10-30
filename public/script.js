@@ -72,3 +72,17 @@ tableWrap.innerHTML = html;
 document.getElementById("logoutBtn").addEventListener("click", () => {
 window.location.href = "index.html";
 });
+// Função para alterar a cor do cartão conforme o percentual
+function updateCardColor(cardElement, percent) {
+  if (!cardElement) return;
+
+  if (percent <= 20) {
+    cardElement.style.backgroundColor = "#8B0000"; // vermelho escuro
+  } else if (percent <= 50) {
+    cardElement.style.backgroundColor = "#B8860B"; // amarelo escuro
+  } else if (percent <= 80) {
+    cardElement.style.backgroundColor = "#2E8B57"; // verde médio
+  } else {
+    cardElement.style.backgroundColor = "#006400"; // verde escuro (cheio)
+  }
+}
