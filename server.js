@@ -7,6 +7,7 @@ const { users } = require("./users");
 const app = express();
 const PORT = process.env.PORT || 10080;
 
+// --- Middleware ---
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors());
@@ -18,8 +19,18 @@ app.use(
   })
 );
 
+// --- Servir frontend ---
 app.use(express.static(path.join(__dirname, "public")));
 
+// --- Banco de dados temporário em memória ---
+let readings = {
+  elevador: { valor: 0, porcentagem: 0, litros: 0, hora: null },
+  osmose: { valor: 0, porcentagem: 0, litros: 0, hora: null },
+  cme: { valor: 0, porcentagem: 0, litros: 0, hora: null },
+  aguaAbrandada: { valor: 0, porcentagem: 0, litros: 0, hora: null },
+};
+
+// --- LOGIN ---
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "login.html"));
 });
@@ -41,9 +52,7 @@ app.post("/login", (req, res) => {
 });
 
 app.get("/dashboard", (req, res) => {
-  if (!req.session.user) {
-    return res.redirect("/");
-  }
+  if (!req.session.user) return res.redirect("/");
   res.sendFile(path.join(__dirname, "public", "dashboard.html"));
 });
 
@@ -52,75 +61,60 @@ app.get("/logout", (req, res) => {
   res.redirect("/");
 });
 
-// Rotas de API simuladas (substituir depois com os dados reais do gateway)
-app.get("/api/data1", (req, res) => {
-  res.json({
-    nivel: 0,
-    litros: 0,
-    capacidade: 20000,
-    ultimaAtualizacao: null,
-  });
-});
-
-app.get("/api/data2", (req, res) => {
-  res.json({
-    nivel: 0,
-    litros: 0,
-    capacidade: 200,
-    ultimaAtualizacao: null,
-  });
-});
-
-app.get("/api/data3", (req, res) => {
-  res.json({
-    nivel: 0,
-    litros: 0,
-    capacidade: 9000,
-    ultimaAtualizacao: null,
-  });
-});
-
-// Rotas de envio de dados (mock)
+// --- ROTAS DE ENVIO (Gateway -> Servidor) ---
 app.post("/api/send1", (req, res) => {
-  console.log("🔹 Recebido dado do reservatório 1:", req.body);
+  readings.elevador = {
+    ...req.body,
+    hora: new Date().toLocaleTimeString("pt-BR"),
+  };
+  console.log("🔹 Dados recebidos do Elevador:", readings.elevador);
   res.json({ status: "OK" });
 });
 
 app.post("/api/send2", (req, res) => {
-  console.log("🔹 Recebido dado do reservatório 2:", req.body);
+  readings.osmose = {
+    ...req.body,
+    hora: new Date().toLocaleTimeString("pt-BR"),
+  };
+  console.log("🔹 Dados recebidos da Osmose:", readings.osmose);
   res.json({ status: "OK" });
 });
 
 app.post("/api/send3", (req, res) => {
-  console.log("🔹 Recebido dado do reservatório 3:", req.body);
+  readings.cme = {
+    ...req.body,
+    hora: new Date().toLocaleTimeString("pt-BR"),
+  };
+  console.log("🔹 Dados recebidos da CME:", readings.cme);
   res.json({ status: "OK" });
 });
-// Rota para leituras dos reservatórios
+
+app.post("/api/send4", (req, res) => {
+  readings.aguaAbrandada = {
+    ...req.body,
+    hora: new Date().toLocaleTimeString("pt-BR"),
+  };
+  console.log("🔹 Dados recebidos da Água Abrandada:", readings.aguaAbrandada);
+  res.json({ status: "OK" });
+});
+
+// --- ROTAS DE CONSULTA (Dashboard -> Servidor) ---
+app.get("/api/data1", (req, res) => res.json(readings.elevador));
+app.get("/api/data2", (req, res) => res.json(readings.osmose));
+app.get("/api/data3", (req, res) => res.json(readings.cme));
+app.get("/api/data4", (req, res) => res.json(readings.aguaAbrandada));
+
+// --- Todas as leituras juntas ---
 app.get("/api/readings", (req, res) => {
   res.json([
-    {
-      hora: "13:40",
-      sensor: "Elevador",
-      valor: 0,
-      porcentagem: 0,
-      litros: 0
-    },
-    {
-      hora: "13:41",
-      sensor: "Osmose",
-      valor: 0,
-      porcentagem: 0,
-      litros: 0
-    },
-    {
-      hora: "13:42",
-      sensor: "Água abrandada",
-      valor: 0,
-      porcentagem: 0,
-      litros: 0
-    }
+    { sensor: "Elevador", ...readings.elevador },
+    { sensor: "Osmose", ...readings.osmose },
+    { sensor: "CME", ...readings.cme },
+    { sensor: "Água abrandada", ...readings.aguaAbrandada },
   ]);
 });
+
+// --- Inicialização ---
 app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
+  console.log(`✅ Servidor rodando na porta ${PORT}`);
 });
