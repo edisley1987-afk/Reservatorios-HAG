@@ -1,7 +1,7 @@
 import express from "express";
 import fs from "fs";
 import cors from "cors";
-import { SENSORS } from "./config.js";
+const { SENSORS } = require("./config.js");
 
 const app = express();
 app.use(cors());
