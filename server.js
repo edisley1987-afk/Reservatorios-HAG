@@ -123,6 +123,22 @@ app.use((req, res, next) => {
 });
 
 // --- Inicialização ---
+// --- SIMULADOR AUTOMÁTICO (teste sem gateway) ---
+setInterval(() => {
+  const gerar = () => ({
+    valor: Math.random() * 5,
+    porcentagem: Math.random() * 100,
+    litros: Math.floor(Math.random() * 1000),
+    hora: new Date().toLocaleTimeString("pt-BR"),
+  });
+
+  readings.elevador = gerar();
+  readings.osmose = gerar();
+  readings.cme = gerar();
+  readings.aguaAbrandada = gerar();
+
+  console.log("📊 Leituras simuladas atualizadas:", readings);
+}, 30000);
 app.listen(PORT, () => {
   console.log(`✅ Servidor rodando na porta ${PORT}`);
 });
