@@ -13,7 +13,6 @@ const LOG_FILE = "./data/log.json";
 
 // Função auxiliar
 function salvarRegistro(dado) {
-  if (!fs.existsSync("./
   if (!fs.existsSync("./data")) fs.mkdirSync("./data");
   fs.appendFileSync(LOG_FILE, JSON.stringify(dado) + ",\n");
 }
@@ -56,7 +55,7 @@ app.get("/api/data", (req, res) => {
       .split("\n")
       .filter(Boolean)
       .map(line => JSON.parse(line))
-      .slice(-100); // últimas 100 leituras
+      .slice(-100);
     res.json(dados.reverse());
   } catch (error) {
     console.error("Erro ao ler log:", error);
